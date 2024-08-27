@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TheRentalApp.Server", "TheRentalApp.Server\TheRentalApp.Server.csproj", "{4F7CAAB6-0D4E-4CFE-84DF-B9B85944F0E4}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "therentalapp.client", "therentalapp.client\therentalapp.client.esproj", "{042D4D08-1EE1-43A9-9702-514CDF096470}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4F7CAAB6-0D4E-4CFE-84DF-B9B85944F0E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F7CAAB6-0D4E-4CFE-84DF-B9B85944F0E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F7CAAB6-0D4E-4CFE-84DF-B9B85944F0E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F7CAAB6-0D4E-4CFE-84DF-B9B85944F0E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{042D4D08-1EE1-43A9-9702-514CDF096470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{042D4D08-1EE1-43A9-9702-514CDF096470}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{042D4D08-1EE1-43A9-9702-514CDF096470}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{042D4D08-1EE1-43A9-9702-514CDF096470}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{042D4D08-1EE1-43A9-9702-514CDF096470}.Release|Any CPU.Build.0 = Release|Any CPU
+		{042D4D08-1EE1-43A9-9702-514CDF096470}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AA43E309-FA90-4DEC-92D9-1BCC8F6848B3}
+	EndGlobalSection
+EndGlobal
