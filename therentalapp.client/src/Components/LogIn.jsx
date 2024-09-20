@@ -11,6 +11,7 @@ function LogIn() {
                         </form>
                         <button class="google-btn">Logga in med Google</button>
                         <a class="signup-link" href="/signup">Skapa ett konto</a>
+
         </div>
     );
 }

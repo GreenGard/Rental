@@ -1,83 +1,145 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using TheRentalApp.Server.Models;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace TheRentalApp.Server.Controllers
 {
-    public class UserController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class UserController : ControllerBase
     {
-        // GET: UserController
-        public ActionResult Index()
+        private readonly ApplicationDbContext _context;
+
+        public UserController(ApplicationDbContext context)
         {
-            return View();
+            _context = context;
         }
 
-        // GET: UserController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: UserController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: UserController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        [HttpGet("test-connection")]
+        public IActionResult TestConnection()
         {
             try
             {
-                return RedirectToAction(nameof(Index));
+                _context.Database.CanConnect(); 
+                return Ok("Database connection is successful.");
             }
-            catch
+            catch (Exception ex)
             {
-                return View();
+                return StatusCode(500, $"Database connection failed: {ex.Message}");
             }
         }
 
-        // GET: UserController/Edit/5
-        public ActionResult Edit(int id)
+        // POST: api/User
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] User user)
         {
-            return View();
+            if (user == null)
+            {
+                return BadRequest("User is null.");
+            }
+
+            if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password))
+            {
+                return BadRequest("Username and password cannot be empty.");
+            }
+
+            try
+            {
+                Console.WriteLine($"Attempting to add user: {user.Username}");
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
+            }
+            catch (DbUpdateException ex)
+            {
+                Console.WriteLine($"DB Update Exception: {ex.Message}");
+                return StatusCode(500, $"Error registering user: {ex.InnerException?.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error: {ex.Message}");
+                return StatusCode(500, $"Unexpected error: {ex.Message}");
+            }
         }
 
-        // POST: UserController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        // GET: api/User/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            return Ok(user);
+        }
+
+        // PUT: api/User/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Edit(int id, User updatedUser)
+        {
+            if (id != updatedUser.Id)
+            {
+                return BadRequest("User ID mismatch.");
+            }
+
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
+
+                user.Username = updatedUser.Username;
+                user.Password = updatedUser.Password;
+
+                _context.Users.Update(user);
+                await _context.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Logga eller hantera felet här
+                return StatusCode(500, $"Error updating user: {ex.InnerException?.Message}");
+            }
+            catch (Exception ex)
+            {
+                // Hantera andra allmänna fel
+                return StatusCode(500, $"Unexpected error: {ex.Message}");
+            }
+        }
+
+        // DELETE: api/User/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return NotFound("User not found.");
+                }
 
-        // GET: UserController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: UserController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+                return NoContent();
             }
-            catch
+            catch (DbUpdateException ex)
             {
-                return View();
+                // Logga eller hantera felet här
+                return StatusCode(500, $"Error deleting user: {ex.InnerException?.Message}");
+            }
+            catch (Exception ex)
+            {
+                // Hantera andra allmänna fel
+                return StatusCode(500, $"Unexpected error: {ex.Message}");
             }
         }
     }
 }
+
