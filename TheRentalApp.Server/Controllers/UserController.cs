@@ -2,6 +2,7 @@
 using TheRentalApp.Server.Models;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace TheRentalApp.Server.Controllers
 {
@@ -10,18 +11,21 @@ namespace TheRentalApp.Server.Controllers
     public class UserController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPasswordHasher<User> _passwordHasher;
 
-        public UserController(ApplicationDbContext context)
+        public UserController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher)
         {
             _context = context;
+            _passwordHasher = passwordHasher;
         }
 
+        // Test database connection
         [HttpGet("test-connection")]
         public IActionResult TestConnection()
         {
             try
             {
-                _context.Database.CanConnect(); 
+                _context.Database.CanConnect();
                 return Ok("Database connection is successful.");
             }
             catch (Exception ex)
@@ -32,38 +36,46 @@ namespace TheRentalApp.Server.Controllers
 
         // POST: api/User
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] User user)
+        public async Task<IActionResult> Create(UserRegistrationDto userDto)
         {
-            if (user == null)
+            if (userDto == null)
             {
-                return BadRequest("User is null.");
+                return BadRequest("User data is null.");
             }
 
-            if (string.IsNullOrEmpty(user.Username) || string.IsNullOrEmpty(user.Password))
+            if (string.IsNullOrEmpty(userDto.Username) || string.IsNullOrEmpty(userDto.Password))
             {
                 return BadRequest("Username and password cannot be empty.");
             }
 
+            
+            var user = new User
+            {
+                Username = userDto.Username
+            };
+
+          
+            user.PasswordHash = _passwordHasher.HashPassword(user, userDto.Password);
+
+
             try
             {
-                Console.WriteLine($"Attempting to add user: {user.Username}");
-                _context.Users.Add(user);
+                _context.Users.Add(user);  
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
             }
             catch (DbUpdateException ex)
             {
-                Console.WriteLine($"DB Update Exception: {ex.Message}");
                 return StatusCode(500, $"Error registering user: {ex.InnerException?.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Unexpected error: {ex.Message}");
                 return StatusCode(500, $"Unexpected error: {ex.Message}");
             }
         }
 
-        // GET: api/User/5
+
+        // GET: api/User/id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUser(int id)
         {
@@ -77,7 +89,7 @@ namespace TheRentalApp.Server.Controllers
             return Ok(user);
         }
 
-        // PUT: api/User/5
+        // PUT: api/User/id
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(int id, User updatedUser)
         {
@@ -94,8 +106,9 @@ namespace TheRentalApp.Server.Controllers
                     return NotFound("User not found.");
                 }
 
+                // Update user details and hash password if changed
                 user.Username = updatedUser.Username;
-                user.Password = updatedUser.Password;
+                user.PasswordHash = _passwordHasher.HashPassword(user, updatedUser.PasswordHash);
 
                 _context.Users.Update(user);
                 await _context.SaveChangesAsync();
@@ -103,12 +116,10 @@ namespace TheRentalApp.Server.Controllers
             }
             catch (DbUpdateException ex)
             {
-                // Logga eller hantera felet här
                 return StatusCode(500, $"Error updating user: {ex.InnerException?.Message}");
             }
             catch (Exception ex)
             {
-                // Hantera andra allmänna fel
                 return StatusCode(500, $"Unexpected error: {ex.Message}");
             }
         }
@@ -131,15 +142,12 @@ namespace TheRentalApp.Server.Controllers
             }
             catch (DbUpdateException ex)
             {
-                // Logga eller hantera felet här
                 return StatusCode(500, $"Error deleting user: {ex.InnerException?.Message}");
             }
             catch (Exception ex)
             {
-                // Hantera andra allmänna fel
                 return StatusCode(500, $"Unexpected error: {ex.Message}");
             }
         }
     }
 }
-
