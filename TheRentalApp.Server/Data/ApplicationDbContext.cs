@@ -9,9 +9,4 @@ public class ApplicationDbContext : DbContext
     }
 
     public DbSet<User> Users { get; set; }
-  //  public object UserRoles { get; internal set; }
-  //  public object Roles { get; internal set; }
 }
-
-
-
