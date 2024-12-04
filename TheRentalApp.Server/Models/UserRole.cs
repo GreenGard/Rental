@@ -2,11 +2,14 @@
 {
     public class UserRole
     {
-        public int UserId { get; set; }
-        public User User { get; set; }
+        //public int UserId { get; set; }
 
-        public int RoleId { get; set; }
-        public Role Role { get; set; }
+        // Non-nullable property, initialized with a default instance
+        //public User User { get; set; } = new User();
+
+        //public int RoleId { get; set; }
+
+        // Non-nullable property, initialized with a default instance
+        //public Role Role { get; set; } = new Role();
     }
-
 }
