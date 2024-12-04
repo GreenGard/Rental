@@ -12,11 +12,18 @@ namespace TheRentalApp.Server.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserController(ApplicationDbContext context, IPasswordHasher<User> passwordHasher)
+        public UserController(ApplicationDbContext context,
+                              IPasswordHasher<User> passwordHasher,
+                              UserManager<User> userManager,
+                              RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _passwordHasher = passwordHasher;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         // Test database connection
@@ -48,20 +55,37 @@ namespace TheRentalApp.Server.Controllers
                 return BadRequest("Username and password cannot be empty.");
             }
 
-            
+            // Skapa användare
             var user = new User
             {
                 Username = userDto.Username
             };
 
-          
+            // Hasha lösenordet
             user.PasswordHash = _passwordHasher.HashPassword(user, userDto.Password);
-
 
             try
             {
-                _context.Users.Add(user);  
+                // Lägg till användare i databasen
+                _context.Users.Add(user);
                 await _context.SaveChangesAsync();
+
+                // Tilldela roll(er) till användaren
+              /*  foreach (var roleName in userDto.Roles)  // userDto.Roles ska vara en lista med roller
+                {
+                    var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == roleName);
+                    if (role != null)
+                    {
+                        _context.UserRoles.Add(new UserRole
+                        {
+                            UserId = user.Id,
+                            RoleId = role.RoleId
+                        });
+                    }
+                }*/
+
+                await _context.SaveChangesAsync();
+
                 return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
             }
             catch (DbUpdateException ex)
@@ -124,7 +148,7 @@ namespace TheRentalApp.Server.Controllers
             }
         }
 
-        // DELETE: api/User/5
+        // DELETE: api/User/id
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
