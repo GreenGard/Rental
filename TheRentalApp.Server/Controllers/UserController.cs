@@ -17,7 +17,7 @@ namespace TheRentalApp.Server.Controllers
 
         public UserController(ApplicationDbContext context,
                               IPasswordHasher<User> passwordHasher,
-                              UserManager<User> userManager
+                              UserManager<User> userManager)
                               // RoleManager<IdentityRole> roleManager)
         {
             _context = context;
